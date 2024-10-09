@@ -6,9 +6,8 @@ import pl.kwojcik.project_lab.user.model.UserEntity;
 
 import java.util.Optional;
 
-public interface UserRepository  {
-    UserEntity save(UserEntity userEntity);
-
+@Repository
+public interface JpaUserRepository extends JpaRepository<UserEntity, Long>, UserRepository {
     Optional<UserEntity> findByUsername(String username);
 
     boolean existsByUsername(String username);

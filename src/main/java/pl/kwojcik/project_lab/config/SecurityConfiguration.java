@@ -1,5 +1,6 @@
 package pl.kwojcik.project_lab.config;
 
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.http.HttpMethod.OPTIONS;
 
+@EnableCaching
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(

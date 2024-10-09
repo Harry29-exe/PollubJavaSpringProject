@@ -1,5 +1,6 @@
 package pl.kwojcik.project_lab.order;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class OrderService {
     }
 
 
+    //start L4 aspectJ
     @Secured(AppPermission.ROLE_ORDER_MODIFY)
     public OrderDTO createOrder(NewOrderDTO newOrderDTO, Authentication auth) {
         var customer = userRepository.findByUsername(auth.getName())
@@ -50,12 +52,14 @@ public class OrderService {
         return mapToOrderDTO(createdOrder);
     }
 
+    @Transactional //start L4 aspectJ
     @Secured(AppPermission.ROLE_ORDER_MODIFY)
     public void deleteOrder(long orderId) {
         this.orderRepository.deleteById(orderId);
     }
 
     @Secured(AppPermission.ROLE_ORDER_VIEW)
+    @Cacheable("clientOrders") //start L4 aspectJ
     public List<OrderDTO> getClientOrders(Authentication auth) {
         var customer = userRepository.findByUsername(auth.getName())
                 .orElseThrow();
@@ -79,6 +83,7 @@ public class OrderService {
                 .id(entity.getId())
                 .creationDate(entity.getCreationDate())
                 .orderPositions(entity.getOrderPositions()
+                        //start L4 stream collection processing
                         .stream()
                         .map(op -> new OrderPositionDTO()
                                 .amount(op.getProductAmount())

@@ -26,6 +26,7 @@ public class AppUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        //start L4 stream collection processing
         var authorities =  this.appRole.getPermissions().stream()
                 .map(AppPermission::getRole)
                 .map(SimpleGrantedAuthority::new)

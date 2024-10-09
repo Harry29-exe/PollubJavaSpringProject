@@ -2,34 +2,48 @@ package pl.kwojcik.project_lab.products;
 
 import pl.kwojcik.project_lab.gen.api.dto.ProductDTO;
 import pl.kwojcik.project_lab.products.dao.ProductRepository;
+import pl.kwojcik.project_lab.user.model.AppPermission;
+import pl.kwojcik.project_lab.utils.CacheResultService;
+import pl.kwojcik.project_lab.utils.PerformanceLogger;
+import pl.kwojcik.project_lab.utils.PermissionCheckerService;
 
 import java.util.List;
+
+import static pl.kwojcik.project_lab.utils.PerformanceLogger.logExecutionTime;
 
 // #Zadanie__1_5 Adapter
 //start L1 Adapter
 class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final PermissionCheckerService permissionCheckerService;
+    private final CacheResultService<Long, ProductDTO> cacheResultService = new CacheResultService<>();
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, PermissionCheckerService permissionCheckerService) {
         this.productRepository = productRepository;
+        this.permissionCheckerService = permissionCheckerService;
     }
 
     public ProductDTO createProduct(ProductDTO productDTO) {
-        var entity = mapProduct(productDTO);
-        var createdEntity = productRepository.save(entity);
-        return mapProduct(createdEntity);
+        //start L4 functional interface -- usage1&2
+        return logExecutionTime(() -> permissionCheckerService.checkPermissionsAndExecute(
+                AppPermission.PRODUCT_MODIFY,
+                () -> {
+                    var entity = mapProduct(productDTO);
+                    var createdEntity = productRepository.save(entity);
+                    return mapProduct(createdEntity);
+                }));
     }
-
-
 
     public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);
     }
 
-
     public ProductDTO getProduct(Long productId) {
-        var entity = productRepository.findById(productId).orElseThrow();
-        return mapProduct(entity);
+        //start L4 functional interface -- usage1&2
+        return cacheResultService.executeOrGetCached(productId, id -> {
+            var entity = productRepository.findById(id).orElseThrow();
+            return mapProduct(entity);
+        });
     }
 
 
