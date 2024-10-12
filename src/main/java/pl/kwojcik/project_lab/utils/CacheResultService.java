@@ -21,7 +21,7 @@ public class CacheResultService<A, T> {
 
     public T executeOrGetCached(A args, FuncWithCacheableResult<T, A> funcWithCacheableResult) {
         var cachedResult = this.cachedResults.get(args);
-        if (cachedResult != null && cachedResult.validUntil().isBefore(Instant.now())) {
+        if (cachedResult != null && cachedResult.validUntil().isAfter(Instant.now())) {
             return cachedResult.value();
         }
 
