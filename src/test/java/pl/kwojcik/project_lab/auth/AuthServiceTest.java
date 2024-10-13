@@ -62,7 +62,9 @@ class AuthServiceTest {
         var auth = authService.authenticate(jwtAuth);
         assert auth.isAuthenticated();
         for (var expectedPermission : AppRole.CUSTOMER.getPermissions()) {
-            assert auth.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+            assert auth.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
                     .anyMatch(a -> a.equals(expectedPermission.getRole()));
         }
     }
@@ -91,11 +93,12 @@ class AuthServiceTest {
         var allowedPermissions = new HashSet<>(AppRole.CUSTOMER.getPermissions());
         var notAllowedPermissions = Arrays.stream(AppPermission.values())
                 .filter(p -> !allowedPermissions.contains(p))
+                .map(AppPermission::name)
                 .collect(Collectors.toSet());
 
         for (var userPermission : auth.getAuthorities()) {
             System.out.println(userPermission);
-            assert !notAllowedPermissions.contains(userPermission);
+            assert !notAllowedPermissions.contains(userPermission.getAuthority());
         }
     }
 
